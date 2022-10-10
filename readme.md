@@ -1,3 +1,5 @@
+# TReS
+
 <div align="center">This repository contains the implementation for the paper:<br />
 
 [No-Reference Image Quality Assessment via Transformers, Relative Ranking, and Self-Consistency (WACV 2022)](https://arxiv.org/pdf/2108.06858.pdf) [Video](https://www.youtube.com/watch?v=Ph3TIqiIN34&ab_channel=AlirezaGolestaneh)
@@ -13,12 +15,127 @@
 
 
 
-## Creat Environment
-This code is train and test on Ubuntu 16.04 while using  Anaconda, python `3.6.6`, and pytorch `1.8.0`.
+## Create Environment
+This code is train and test on Ubuntu 16.04 while using Anaconda, python `3.6.6`, and pytorch `1.8.0`.
 To set up the evironment run:
 `conda env create -f environment.yml`
 after installing the virtuall env you should be able to run `python -c "import torch; print(torch.__version__)" ` in the terminal and see `1.8.0`
 
+Docker Commands:
+```bash
+# For DGX
+docker build -t iqa_tres .
+
+## Sample 
+docker run --ipc=host -it \
+    --gpus '"device=3"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output:/home/tres/hope/Save_TReS_18/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/live/databaserelease2:/home/tres/qadata/live \
+    --name iqa_tres \
+    iqa_tres
+
+# Command to train
+OMP_NUM_THREADS=1 python /home/tres/TReS/run.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/qadata/live'  --dataset 'live' --seed 2021 --vesion 1
+
+# Command to test
+OMP_NUM_THREADS=1 python /home/tres/TReS/testing.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/qadata/live'  --dataset 'live' --seed 2021 --vesion 1
+
+
+### Train
+## LiveITW dataset
+docker run --ipc=host -it \
+    --gpus '"device=1"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_va:/home/tres/hope/Save_TReS_18/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/liveitw/ChallengeDB_release:/home/tres/qadata/liveitw \
+    iqa_tres:latest
+
+OMP_NUM_THREADS=1 python /home/tres/TReS/run.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/qadata/liveitw'  --dataset 'clive' --seed 2021 --vesion 1
+
+
+## VA dataset
+docker run --ipc=host -it \
+    --gpus '"device=3"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_va:/home/tres/hope/Save_TReS_18_diy/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/va:/home/tres/raw_dataset \
+    iqa_tres:latest
+
+OMP_NUM_THREADS=1 python /home/tres/TReS/run.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18_diy/'   --droplr 3 --epochs 1 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'va' --seed 2021 --vesion 1
+
+
+## LIVE dataset
+docker run --ipc=host -it \
+    --gpus '"device=3"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output:/home/tres/hope/Save_TReS_18/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/live/databaserelease2:/home/tres/raw_dataset \
+    iqa_tres:latest
+
+OMP_NUM_THREADS=1 python /home/tres/TReS/run.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'   --droplr 3 --epochs 1 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'live' --seed 2021 --vesion 2
+
+
+## DIY dataset (Merging LIVE/CLIVE/VA)
+docker run --ipc=host -it \
+    --gpus '"device=2"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_diy:/home/tres/hope/Save_TReS_18/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset:/home/tres/raw_dataset \
+    iqa_tres:latest
+
+OMP_NUM_THREADS=1 python /home/tres/TReS/run.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'  --droplr 3 --epochs 5 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'diy' --seed 2021 --vesion 1
+
+
+### Test
+## Test DIY model on VA dataset
+docker run --ipc=host -it \
+    --gpus '"device=1"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_diy:/home/tres/hope/Save_TReS_18_diy/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/va:/home/tres/raw_dataset \
+    iqa_tres:latest
+
+# Make a copy of the best model
+cp /home/tres/hope/Save_TReS_18_diy/diy_1_2021/sv/bestmodel_1_2021 /home/tres/hope/Save_TReS_18_diy/va_1_2021/sv/bestmodel_1_2021
+# Run
+cd /home/tres/TReS
+OMP_NUM_THREADS=1 python test.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18_diy/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'va' --seed 2021 --vesion 1
+
+
+## Test DIY model on CLIVE dataset
+docker run --ipc=host -it \
+    --gpus '"device=1"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_diy:/home/tres/hope/Save_TReS_18_diy/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/liveitw/ChallengeDB_release:/home/tres/raw_dataset \
+    iqa_tres:latest
+# Make directory
+mkdir /home/tres/hope/Save_TReS_18_diy/clive_1_2021/
+mkdir /home/tres/hope/Save_TReS_18_diy/clive_1_2021/sv/
+# Make a copy of the best model
+cp /home/tres/hope/Save_TReS_18_diy/diy_1_2021/sv/bestmodel_1_2021 /home/tres/hope/Save_TReS_18_diy/clive_1_2021/sv/bestmodel_1_2021
+# Run
+cd /home/tres/TReS
+OMP_NUM_THREADS=1 python test.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18_diy/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'clive' --seed 2021 --vesion 1
+
+
+## Test DIY model on LIVE dataset
+docker run --ipc=host -it \
+    --gpus '"device=0"' \
+    -v /home/gohjiayi/Desktop/TReS:/home/tres/TReS \
+    -v /home/gohjiayi/Desktop/TReS/output_diy:/home/tres/hope/Save_TReS_18/ \
+    -v /home/gohjiayi/Desktop/iqa/raw_dataset/live/databaserelease2:/home/tres/raw_dataset \
+    iqa_tres:latest
+# Make directory
+mkdir /home/tres/hope/Save_TReS_18/live_1_2021/
+mkdir /home/tres/hope/Save_TReS_18/live_1_2021/sv/
+# Make a copy of the best model
+cp /home/tres/hope/Save_TReS_18/diy_1_2021/sv/bestmodel_1_2021 /home/tres/hope/Save_TReS_18/live_1_2021/sv/bestmodel_1_2021
+# Run
+cd /home/tres/TReS
+OMP_NUM_THREADS=1 python test.py  --num_encoder_layerst 2 --dim_feedforwardt 64 --nheadt 16 --network 'resnet18' --batch_size 220  --svpath  '/home/tres/hope/Save_TReS_18/'   --droplr 3 --epochs 9 --gpunum '0'  --datapath  '/home/tres/raw_dataset'  --dataset 'live' --seed 2021 --vesion 1
+```
 
 
 

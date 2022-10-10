@@ -16,7 +16,7 @@ class DataLoader(object):
 		self.batch_size = batch_size
 		self.istrain = istrain
 
-		if (dataset == 'live') | (dataset == 'csiq') | (dataset == 'tid2013') | (dataset == 'clive')| (dataset == 'kadid10k'):
+		if (dataset == 'live') | (dataset == 'csiq') | (dataset == 'tid2013') | (dataset == 'clive')| (dataset == 'kadid10k') | (dataset == 'diy') | (dataset == 'va'):
 			if istrain:
 				transforms = torchvision.transforms.Compose([
 					torchvision.transforms.RandomHorizontalFlip(),
@@ -88,7 +88,13 @@ class DataLoader(object):
 				root=path, index=img_indx, transform=transforms, patch_num=patch_num)
 		elif dataset == 'kadid10k':
 			self.data = folders.Kadid10k(
-				root=path, index=img_indx, transform=transforms, patch_num=patch_num)			
+				root=path, index=img_indx, transform=transforms, patch_num=patch_num)
+		elif dataset == 'diy':
+			self.data = folders.DIYFolder(
+				root=path, index=img_indx, transform=transforms, patch_num=patch_num)
+		elif dataset == 'va':
+			self.data = folders.VAFolder(
+				root=path, index=img_indx, transform=transforms, patch_num=patch_num)
 
 	def get_data(self):
 		if self.istrain:

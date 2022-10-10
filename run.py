@@ -28,6 +28,8 @@ def main(config,device):
         'clive':    config.datapath,
         'koniq':    config.datapath,
         'fblive':   config.datapath,
+        'diy':   config.datapath,
+        'va':   config.datapath,
         }
 
     img_num = {
@@ -38,6 +40,8 @@ def main(config,device):
         'clive':    list(range(0, 1162)),
         'koniq':    list(range(0, 10073)),
         'fblive':   list(range(0, 39810)),
+        'diy':    list(range(0, 1582)),
+        'va':    list(range(0, 391)),
         }
     
 

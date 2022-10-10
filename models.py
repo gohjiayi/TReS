@@ -220,7 +220,7 @@ class TReS(object):
 			gt_scores = []
 			pbar = tqdm(self.train_data, leave=False)
 
-			for img, label in pbar:
+			for img, label, path in pbar:
 				img = torch.as_tensor(img.to(self.device)).requires_grad_(False)
 				label = torch.as_tensor(label.to(self.device)).requires_grad_(False)
 
@@ -333,6 +333,7 @@ class TReS(object):
 		self.net.eval()
 		pred_scores = []
 		gt_scores = []
+		paths = []
 		
 		pbartest = tqdm(data, leave=False)
 
@@ -341,7 +342,7 @@ class TReS(object):
 		
 			
 	
-			for img, label in pbartest:
+			for img, label, path in pbartest:
 				img = torch.as_tensor(img.to(self.device))
 				label = torch.as_tensor(label.to(self.device))
 				pred,_ = self.net(img)
@@ -349,21 +350,21 @@ class TReS(object):
 	
 				pred_scores = pred_scores + pred.cpu().tolist()
 				gt_scores = gt_scores + label.cpu().tolist()
+				paths.append(path)
 				
 				steps2 += 1
 				
 		
-		
-			
 		pred_scores = np.mean(np.reshape(np.array(pred_scores), (-1, self.test_patch_num)), axis=1)
 		gt_scores = np.mean(np.reshape(np.array(gt_scores), (-1, self.test_patch_num)), axis=1)
+		paths = paths[0::self.test_patch_num]
 		
 
 # 		if not pretrained:
 		dataPath = svPath + '/test_prediction_gt_{}_{}_{}.csv'.format(str(self.config.vesion),str(seed),epochnum)
 		with open(dataPath, 'w') as f:
 			writer = csv.writer(f)
-			writer.writerows(zip(pred_scores, gt_scores))
+			writer.writerows(zip(paths, pred_scores, gt_scores))
 			
 			
 		test_srcc, _ = stats.spearmanr(pred_scores, gt_scores)
